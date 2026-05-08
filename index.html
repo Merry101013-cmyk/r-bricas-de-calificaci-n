@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constructor de rúbricas | Cibercolegio UCN</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-2: #eef5fb;
+      --ink: #18212f;
+      --muted: #5f6d7e;
+      --line: #d8e2ec;
+      --brand: #005a9c;
+      --brand-2: #00a5c8;
+      --green: #57a83f;
+      --yellow: #f3c042;
+      --red: #d94c4c;
+      --shadow: 0 18px 42px rgba(20, 36, 58, 0.13);
+      --radius: 8px;
+      --font: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(0, 90, 156, 0.08), transparent 340px),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 76px;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px max(18px, calc((100vw - 1340px) / 2));
+      border-bottom: 1px solid rgba(216, 226, 236, 0.85);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand img {
+      width: 154px;
+      height: 58px;
+      object-fit: contain;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 8px;
+    }
+
+    .brand-title {
+      min-width: 0;
+    }
+
+    .brand-title strong {
+      display: block;
+      font-size: 1rem;
+      line-height: 1.15;
+    }
+
+    .brand-title span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 390px minmax(0, 1fr);
+      gap: 18px;
+      width: min(1340px, calc(100% - 32px));
+      margin: 18px auto 0;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff, #f8fbfe);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.35rem, 2vw, 2rem);
+      line-height: 1.08;
+    }
+
+    h2 {
+      font-size: 1rem;
+    }
+
+    h3 {
+      font-size: 0.92rem;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    #areaFocus {
+      white-space: pre-line;
+    }
+
+    .builder {
+      position: sticky;
+      top: 92px;
+      max-height: calc(100vh - 108px);
+      overflow: auto;
+    }
+
+    .form-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #2c394b;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 11px;
+      outline: none;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--brand-2);
+      box-shadow: 0 0 0 3px rgba(0, 165, 200, 0.16);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 39px;
+      padding: 9px 12px;
+      border-radius: var(--radius);
+      font-weight: 850;
+      font-size: 0.9rem;
+      transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: white;
+      box-shadow: 0 12px 24px rgba(0, 90, 156, 0.22);
+    }
+
+    .btn-secondary {
+      background: #e9f5fb;
+      color: var(--brand);
+      border: 1px solid #c6e5f1;
+    }
+
+    .btn-quiet {
+      background: #f4f7fa;
+      color: #35445a;
+      border: 1px solid var(--line);
+    }
+
+    .btn-danger {
+      background: #fff1f1;
+      color: #a63232;
+      border: 1px solid #ffd0d0;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+    }
+
+    .criterion-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .criterion-item {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+    }
+
+    .criterion-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px 0;
+    }
+
+    .tab {
+      background: #eff5fa;
+      color: #405269;
+      border: 1px solid var(--line);
+    }
+
+    .tab.active {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+
+    .workspace {
+      display: grid;
+      gap: 18px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      gap: 18px;
+    }
+
+    .hero-panel {
+      padding: 18px;
+      background:
+        linear-gradient(135deg, rgba(0, 90, 156, 0.95), rgba(0, 165, 200, 0.88)),
+        #005a9c;
+      color: #fff;
+      border-radius: var(--radius);
+      min-height: 178px;
+      display: grid;
+      align-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel .muted {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.16);
+      color: inherit;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .info-grid {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .info-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .info-card h3 {
+      margin-bottom: 6px;
+      color: var(--brand);
+    }
+
+    .compact-list {
+      display: grid;
+      gap: 6px;
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .compact-list li {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .compact-list li::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-top: 7px;
+      background: var(--brand-2);
+    }
+
+    .rubric-wrap {
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .rubric-card {
+      width: 100%;
+      min-width: 860px;
+      border: 1px solid #c8d7e4;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: white;
+    }
+
+    .rubric-meta {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1fr);
+      border-bottom: 1px solid #c8d7e4;
+    }
+
+    .rubric-meta div {
+      padding: 9px 11px;
+      border-bottom: 1px solid #e1e9f0;
+      min-height: 38px;
+    }
+
+    .rubric-meta div:nth-child(odd) {
+      background: #edf5fb;
+      font-weight: 850;
+      color: #24435f;
+    }
+
+    .rubric-meta div:nth-last-child(-n+2) {
+      border-bottom: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border: 1px solid #c8d7e4;
+      padding: 11px;
+      vertical-align: top;
+      text-align: left;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    th {
+      background: var(--brand);
+      color: white;
+      font-size: 0.88rem;
+    }
+
+    th:first-child {
+      width: 18%;
+    }
+
+    td:first-child {
+      background: #f7fbfe;
+      font-weight: 850;
+      color: #24384f;
+    }
+
+    .level-superior {
+      border-top: 4px solid var(--green);
+    }
+
+    .level-alto {
+      border-top: 4px solid var(--brand-2);
+    }
+
+    .level-basico {
+      border-top: 4px solid var(--yellow);
+    }
+
+    .level-bajo {
+      border-top: 4px solid var(--red);
+    }
+
+    .editable-cell {
+      min-height: 104px;
+      outline: none;
+      border-radius: 4px;
+    }
+
+    .editable-cell:focus {
+      box-shadow: inset 0 0 0 2px rgba(0, 165, 200, 0.34);
+      background: #fbfeff;
+    }
+
+    .records {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      max-height: 460px;
+      overflow: auto;
+    }
+
+    .record-item {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+    }
+
+    .record-title {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 850;
+    }
+
+    .footer {
+      width: min(1340px, calc(100% - 32px));
+      margin: 20px auto 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      flex-wrap: wrap;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 20;
+      max-width: 360px;
+      padding: 12px 14px;
+      background: #152238;
+      color: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      font-weight: 750;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1050px) {
+      .layout,
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .builder {
+        position: static;
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .brand img {
+        width: 132px;
+        height: 52px;
+      }
+
+      .layout,
+      .footer {
+        width: min(100% - 20px, 1340px);
+      }
+
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .top-actions,
+      .button-row {
+        width: 100%;
+      }
+
+      .btn {
+        flex: 1 1 auto;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .topbar,
+      .builder,
+      .summary,
+      .tabs,
+      .footer,
+      .toast {
+        display: none;
+      }
+
+      .layout {
+        display: block;
+        width: 100%;
+        margin: 0;
+      }
+
+      .panel {
+        border: 0;
+        box-shadow: none;
+      }
+
+      .rubric-wrap {
+        padding: 0;
+      }
+
+      .rubric-card {
+        min-width: 0;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/logo-ciber-ucn.png" alt="Cibercolegio UCN">
+        <div class="brand-title">
+          <strong>Constructor institucional de rúbricas</strong>
+          <span>Encuentros sincrónicos, socializaciones y dinamizaciones</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-secondary" id="saveBtn" type="button" title="Guardar registro">Guardar</button>
+        <button class="btn btn-quiet" id="downloadDocBtn" type="button" title="Descargar documento">Documento</button>
+        <button class="btn btn-quiet" id="guideBtn" type="button" title="Guía del proceso">Guía</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel builder" aria-label="Constructor de rúbrica">
+        <div class="panel-header">
+          <div>
+            <h2>Datos de la rúbrica</h2>
+            <p class="muted">La tabla se actualiza con cada cambio.</p>
+          </div>
+        </div>
+
+        <section class="form-section">
+          <div class="form-grid">
+            <label>
+              Area
+              <select id="areaSelect"></select>
+            </label>
+            <div class="two-col">
+              <label>
+                Ciclo
+                <select id="cycleSelect">
+                  <option value="Ciclo 1: 1° a 3°">Ciclo 1: 1° a 3°</option>
+                  <option value="Ciclo 2: 4° a 5°">Ciclo 2: 4° a 5°</option>
+                  <option value="Ciclo 3 y 4: 6° a 9°">Ciclo 3 y 4: 6° a 9°</option>
+                  <option value="Ciclo 5: 10° y 11°">Ciclo 5: 10° y 11°</option>
+                </select>
+              </label>
+              <label>
+                Tipo de actividad
+                <select id="activitySelect">
+                  <option value="Encuentro sincrónico">Encuentro sincrónico</option>
+                  <option value="Socialización">Socialización</option>
+                  <option value="Dinamización/Socialización">Dinamización/Socialización</option>
+                </select>
+              </label>
+            </div>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="panel-header" style="padding:0 0 12px;border:0;background:transparent">
+            <div>
+              <h2>Criterios</h2>
+              <p class="muted">Incluye criterios transversales y propios del área.</p>
+            </div>
+          </div>
+          <div class="button-row" style="margin-bottom:12px">
+            <button class="btn btn-secondary" id="loadAreaCriteriaBtn" type="button">Cargar sugeridos</button>
+            <button class="btn btn-secondary" id="resetCommonBtn" type="button">Restablecer comunes</button>
+            <button class="btn btn-quiet" id="addCriterionBtn" type="button">Agregar</button>
+          </div>
+          <div class="criterion-list" id="criterionList"></div>
+        </section>
+
+        <section class="form-section">
+          <div class="button-row">
+            <button class="btn btn-primary" id="generateBtn" type="button">Generar descriptores</button>
+            <button class="btn btn-quiet" id="clearBtn" type="button">Nuevo</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <div class="summary">
+          <section class="hero-panel">
+            <div>
+              <h1 id="heroTitle">Rúbrica para Encuentro sincrónico</h1>
+              <p class="muted" id="heroCopy">Criterios observables, progresión cognitiva y coherencia con el ciclo seleccionado.</p>
+            </div>
+            <div class="chips" id="heroChips"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Orientación del área</h2>
+                <p class="muted" id="areaFocus">Selecciona un área para ver su enfoque curricular.</p>
+              </div>
+            </div>
+            <div class="info-grid">
+              <article class="info-card">
+                <h3>Competencias sugeridas</h3>
+                <ul class="compact-list" id="competencyList"></ul>
+              </article>
+              <article class="info-card">
+                <h3>Enfoque por ciclo</h3>
+                <p class="muted" id="cycleFocus"></p>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Tabla de valoración</h2>
+              <p class="muted">Edita directamente cualquier descriptor antes de descargar.</p>
+            </div>
+            <div class="button-row">
+              <button class="btn btn-quiet" id="printBtn" type="button">Imprimir</button>
+            </div>
+          </div>
+          <div class="rubric-wrap">
+            <div class="rubric-card" id="rubricExport">
+              <div class="rubric-meta" id="rubricMeta"></div>
+              <table aria-label="Rubrica de evaluacion">
+                <thead>
+                  <tr>
+                    <th>Criterio</th>
+                    <th class="level-superior">Superior<br><small>5.4 a 6.0</small></th>
+                    <th class="level-alto">Alto<br><small>4.68 a 5.4</small></th>
+                    <th class="level-basico">Básico<br><small>3.48 a 4.68</small></th>
+                    <th class="level-bajo">Bajo<br><small>0 a 3.48</small></th>
+                  </tr>
+                </thead>
+                <tbody id="rubricBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="tabs">
+            <button class="btn tab active" id="recordsTab" type="button">Registros</button>
+            <button class="btn tab" id="guidelinesTab" type="button">Lineamientos</button>
+          </div>
+          <div id="recordsView">
+            <div class="panel-header">
+              <div>
+                <h2>Almacenamiento local</h2>
+                <p class="muted">Registros guardados en este navegador.</p>
+              </div>
+              <div class="button-row">
+                <button class="btn btn-secondary" id="exportRecordsBtn" type="button">CSV</button>
+                <button class="btn btn-danger" id="deleteRecordsBtn" type="button">Vaciar</button>
+              </div>
+            </div>
+            <div class="records" id="recordsList"></div>
+          </div>
+          <div id="guidelinesView" hidden>
+            <div class="info-grid">
+              <article class="info-card">
+                <h3>Guía del proceso</h3>
+                <ul class="compact-list">
+                  <li>Selecciona el área en la lista desplegable.</li>
+                  <li>Elige el ciclo y confirma el tipo de actividad.</li>
+                  <li>Usa Cargar sugeridos para traer criterios del área o Agregar para incluir criterios propios.</li>
+                  <li>Usa Restablecer comunes si se modifican los criterios institucionales transversales.</li>
+                  <li>Revisa y edita los descriptores directamente en la tabla.</li>
+                  <li>Selecciona Guardar para conservar el registro local o Documento para descargar la rúbrica.</li>
+                </ul>
+                <p class="muted" style="margin-top:10px">
+                  Documento base:
+                  <a href="file:///Users/johana/Library/CloudStorage/OneDrive-FUCN/2026/CAPACITACIONES%20DOCENTES/ORIENTACIONES%20PARA%20LA%20CONSTRUCCIO%CC%81N%20DE%20RU%CC%81BRICAS%20DE%20EVALUACIO%CC%81N.pdf" target="_blank" rel="noopener">
+                    Orientaciones para la construcción de rúbricas de evaluación
+                  </a>
+                </p>
+              </article>
+              <article class="info-card">
+                <h3>Lineamientos comunes</h3>
+                <ul class="compact-list">
+                  <li>Progresión cognitiva de menor a mayor complejidad.</li>
+                  <li>Coherencia con el grado y ciclo.</li>
+                  <li>Uso de verbos observables y medibles.</li>
+                  <li>Claridad en el desempeño esperado.</li>
+                </ul>
+              </article>
+              <article class="info-card">
+                <h3>Criterios transversales</h3>
+                <ul class="compact-list">
+                  <li>Participación en el encuentro sincrónico.</li>
+                  <li>Comunicación digital.</li>
+                  <li>Uso de herramientas tecnológicas.</li>
+                  <li>Cumplimiento de compromisos académicos.</li>
+                </ul>
+              </article>
+              <article class="info-card">
+                <h3>Equilibrio evaluativo</h3>
+                <ul class="compact-list">
+                  <li>Lo conceptual: saber.</li>
+                  <li>Lo procedimental: hacer.</li>
+                  <li>Lo actitudinal: ser.</li>
+                </ul>
+              </article>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Cibercolegio UCN</span>
+      <strong>Developed by Mary J. Galeano</strong>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const LEVELS = [
+      { key: "superior", label: "Superior", range: "5.4 a 6.0" },
+      { key: "alto", label: "Alto", range: "4.68 a 5.4" },
+      { key: "basico", label: "Básico", range: "3.48 a 4.68" },
+      { key: "bajo", label: "Bajo", range: "0 a 3.48" }
+    ];
+
+    const TRANSVERSAL_CRITERIA = [
+      "Participación en el encuentro sincrónico",
+      "Comunicación digital",
+      "Uso de herramientas tecnológicas",
+      "Cumplimiento de compromisos académicos"
+    ];
+
+    const AREAS = {
+      "Lengua Castellana": {
+        focus: "Orienta la rúbrica hacia la comprensión, interpretación y producción textual. En primaria conviene privilegiar comprensión lectora básica y expresión oral; en secundaria, interpretación y argumentación; y en media, escritura estructurada, lectura crítica y análisis textual avanzado.",
+        competencies: ["Comprensión e interpretación textual", "Producción textual oral y escrita", "Competencia comunicativa"],
+        criteria: ["Comprensión e interpretación textual", "Producción oral", "Producción escrita", "Argumentación y lectura crítica"],
+        cycles: {
+          primaria: "Reconocimiento, comprensión básica y expresión oral inicial.",
+          secundaria: "Interpretación, análisis de textos y producción estructurada.",
+          media: "Argumentación, análisis crítico e intertextualidad."
+        }
+      },
+      "Matemáticas": {
+        focus: "Centra los criterios en razonamiento, resolución de problemas y modelación. La rúbrica debe mostrar cómo el estudiante comprende, representa, analiza y valida situaciones matemáticas, considerando los pensamientos numérico, métrico, geométrico, aleatorio y variacional.",
+        competencies: ["Razonamiento y argumentación", "Resolución de problemas", "Modelación"],
+        criteria: ["Razonamiento y argumentación", "Resolución de problemas", "Modelación matemática", "Representación e interpretación de información"],
+        cycles: {
+          primaria: "Pensamiento numérico y métrico a través de situaciones cotidianas y representaciones básicas.",
+          secundaria: "Pensamiento geométrico, variacional y aleatorio para analizar, interpretar y resolver problemas contextualizados.",
+          media: "Modelación, análisis de datos, argumentación formal y validación de resultados."
+        }
+      },
+      "Ciencias Naturales y Educación Ambiental": {
+        focus: "Enfoca la evaluación en indagación, explicación de fenómenos y uso del conocimiento científico. Los criterios deben evidenciar observación, formulación de preguntas, análisis de información, relaciones entre variables y aplicación del conocimiento en situaciones reales.",
+        competencies: ["Indagación científica", "Explicación de fenómenos", "Uso del conocimiento científico"],
+        criteria: ["Indagación científica", "Explicación de fenómenos", "Uso del conocimiento científico", "Análisis de evidencias"],
+        cycles: {
+          primaria: "Observación, exploración y clasificación de fenómenos naturales con preguntas sencillas.",
+          secundaria: "Procesos biológicos, físicos y químicos, interpretación de información y relaciones entre variables.",
+          media: "Física, química, procesos biológicos, modelación, experimentación y problemáticas ambientales."
+        }
+      },
+      "Ciencias Sociales": {
+        focus: "Dirige los criterios a la comprensión de procesos históricos, geográficos, económicos y políticos. La rúbrica debe valorar interpretación del contexto, análisis de problemáticas sociales, pensamiento crítico, participación ciudadana y posturas argumentadas.",
+        competencies: ["Pensamiento social", "Interpretación del contexto", "Competencias ciudadanas"],
+        criteria: ["Pensamiento social", "Interpretación del contexto", "Análisis de problemáticas sociales", "Participación ciudadana"],
+        cycles: {
+          primaria: "Reconocimiento del entorno social, cultural, normas, roles y territorio cercano.",
+          secundaria: "Análisis de procesos históricos y geográficos, relaciones sociales y explicaciones del entorno.",
+          media: "Economía, política, sistemas sociales, participación ciudadana y argumentación contextual."
+        }
+      },
+      "Educación Religiosa Escolar": {
+        focus: "Plantea la evaluación desde la comprensión del hecho religioso, la reflexión ética y la vivencia de valores. Los desempeños pueden mostrar reconocimiento de la dimensión espiritual, análisis de experiencias religiosas, diálogo respetuoso y construcción del proyecto de vida.",
+        competencies: ["Comprensión del hecho religioso", "Reflexión ética", "Vivencia de valores"],
+        criteria: ["Comprensión del hecho religioso", "Reflexión ética", "Vivencia de valores", "Proyecto de vida"],
+        cycles: {
+          primaria: "Valores, relatos y experiencias religiosas significativas en el entorno cercano.",
+          secundaria: "Experiencias religiosas, reflexión ética y diversidad de creencias.",
+          media: "Reflexión crítica, proyecto de vida y diálogo interreligioso."
+        }
+      },
+      "Educación Artística": {
+        focus: "Valora sensibilidad, percepción, expresión y creación. Los criterios deben permitir observar cómo el estudiante explora, interpreta, experimenta y produce manifestaciones artísticas, relacionándolas con técnicas, intención comunicativa y contexto cultural.",
+        competencies: ["Apreciación estética", "Expresión", "Creación"],
+        criteria: ["Apreciación estética", "Expresión artística", "Creación", "Relación con el contexto cultural"],
+        cycles: {
+          primaria: "Exploración sensorial y reconocimiento de formas, sonidos, colores y movimientos.",
+          secundaria: "Desarrollo técnico en lenguajes artísticos y expresión creativa.",
+          media: "Producción artística con intención comunicativa, reflexión crítica y contexto cultural."
+        }
+      },
+      "Educación Física": {
+        focus: "Enfoca los criterios en capacidades motrices, cuidado del cuerpo y vida saludable. La rúbrica puede valorar reconocimiento corporal, participación en prácticas físicas, trabajo en equipo, comprensión de reglas, autocuidado y hábitos de bienestar.",
+        competencies: ["Desarrollo motor", "Cuidado del cuerpo", "Vida saludable"],
+        criteria: ["Desarrollo motor", "Cuidado del cuerpo", "Vida saludable", "Trabajo en equipo y normas"],
+        cycles: {
+          primaria: "Habilidades motrices básicas mediante juego, exploración corporal e interacción.",
+          secundaria: "Prácticas deportivas, trabajo en equipo y comprensión de normas y reglas.",
+          media: "Autocuidado, planificación del entrenamiento y hábitos de vida saludable."
+        }
+      },
+      "Filosofía": {
+        focus: "Organiza la evaluación alrededor del pensamiento crítico, la argumentación y la reflexión filosófica. Los criterios deben evidenciar formulación de preguntas, análisis de ideas, lectura de textos, relaciones intertextuales y construcción de posturas sustentadas.",
+        competencies: ["Pensamiento crítico", "Argumentación filosófica", "Análisis intertextual"],
+        criteria: ["Pensamiento crítico", "Argumentación filosófica", "Análisis intertextual", "Problematización"],
+        cycles: {
+          primaria: "No aplica como área regular en primaria.",
+          secundaria: "Acercamiento a preguntas filosóficas y análisis inicial de posturas.",
+          media: "Problematización, argumentación estructurada, textos filosóficos e intertextualidad."
+        }
+      },
+      "Ética y Valores": {
+        focus: "Propone criterios asociados con competencias ciudadanas, reflexión ética, convivencia y participación. La rúbrica debe reconocer normas, toma de decisiones responsables, resolución de conflictos, argumentación ética y construcción de ambientes democráticos.",
+        competencies: ["Competencias ciudadanas", "Reflexión ética", "Convivencia y participación"],
+        criteria: ["Competencias ciudadanas", "Reflexión ética", "Convivencia y participación", "Toma de decisiones responsables"],
+        cycles: {
+          primaria: "Normas, valores y acuerdos en el entorno cercano para promover respeto y convivencia.",
+          secundaria: "Decisiones, resolución de conflictos y análisis de responsabilidad social.",
+          media: "Argumentación ética, participación activa y construcción de ciudadanía."
+        }
+      },
+      "Inglés": {
+        focus: "Evalúa el desarrollo comunicativo en lengua extranjera: comprensión, producción e interacción. Los criterios deben articular listening, reading, speaking y writing según el nivel, desde instrucciones y vocabulario cotidiano hasta comunicación autónoma y producción organizada.",
+        competencies: ["Listening", "Reading", "Speaking", "Writing"],
+        criteria: ["Listening", "Reading", "Speaking", "Writing"],
+        cycles: {
+          primaria: "A1-A2 inicial: instrucciones básicas, vocabulario cotidiano y expresiones simples.",
+          secundaria: "A2-B1: textos y audios sencillos, intercambios comunicativos y producción guiada.",
+          media: "B1-B2: interacción fluida, argumentación básica y producción escrita organizada."
+        }
+      }
+    };
+
+    const STORAGE_KEY = "cibercolegio_rubricas_registros_v1";
+
+    const state = {
+      criteria: [],
+      descriptors: {}
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const areaSelect = $("#areaSelect");
+    const cycleSelect = $("#cycleSelect");
+    const activitySelect = $("#activitySelect");
+    const criterionList = $("#criterionList");
+    const rubricBody = $("#rubricBody");
+    const rubricMeta = $("#rubricMeta");
+    const heroTitle = $("#heroTitle");
+    const heroCopy = $("#heroCopy");
+    const heroChips = $("#heroChips");
+    const areaFocus = $("#areaFocus");
+    const competencyList = $("#competencyList");
+    const cycleFocus = $("#cycleFocus");
+    const recordsList = $("#recordsList");
+    const toast = $("#toast");
+
+    function init() {
+      Object.keys(AREAS).forEach((area) => {
+        const option = document.createElement("option");
+        option.value = area;
+        option.textContent = area;
+        areaSelect.appendChild(option);
+      });
+
+      state.criteria = [...TRANSVERSAL_CRITERIA, ...AREAS[areaSelect.value].criteria.slice(0, 2)];
+      bindEvents();
+      recommendActivity();
+      generateDescriptors();
+      renderAll();
+    }
+
+    function bindEvents() {
+      [areaSelect, cycleSelect, activitySelect].forEach((input) => {
+        input.addEventListener("input", () => {
+          if (input === areaSelect) {
+            recommendActivity();
+            loadAreaCriteria();
+          }
+          renderAll();
+        });
+      });
+
+      $("#loadAreaCriteriaBtn").addEventListener("click", () => {
+        loadAreaCriteria();
+        showToast("Criterios sugeridos cargados.");
+      });
+      $("#resetCommonBtn").addEventListener("click", resetCommonCriteria);
+      $("#addCriterionBtn").addEventListener("click", () => addCriterion(""));
+      $("#generateBtn").addEventListener("click", () => {
+        generateDescriptors();
+        renderAll();
+        showToast("Descriptores generados.");
+      });
+      $("#clearBtn").addEventListener("click", clearForm);
+      $("#saveBtn").addEventListener("click", saveRecord);
+      $("#downloadDocBtn").addEventListener("click", downloadDocument);
+      $("#guideBtn").addEventListener("click", openGuide);
+      $("#printBtn").addEventListener("click", () => window.print());
+      $("#exportRecordsBtn").addEventListener("click", exportRecordsCsv);
+      $("#deleteRecordsBtn").addEventListener("click", deleteRecords);
+      $("#recordsTab").addEventListener("click", () => switchTab("records"));
+      $("#guidelinesTab").addEventListener("click", () => switchTab("guidelines"));
+    }
+
+    function recommendActivity() {
+      activitySelect.value = "Dinamización/Socialización";
+    }
+
+    function loadAreaCriteria() {
+      const area = AREAS[areaSelect.value];
+      state.criteria = unique([...TRANSVERSAL_CRITERIA, ...area.criteria]);
+      generateDescriptors();
+      renderCriteria();
+      renderRubric();
+    }
+
+    function resetCommonCriteria() {
+      const areaCriteria = state.criteria
+        .slice(TRANSVERSAL_CRITERIA.length)
+        .filter((criterion) => !TRANSVERSAL_CRITERIA.includes(criterion.trim()));
+      state.criteria = unique([...TRANSVERSAL_CRITERIA, ...areaCriteria]);
+      generateDescriptors();
+      renderAll();
+      showToast("Criterios comunes restablecidos.");
+    }
+
+    function addCriterion(value) {
+      state.criteria.push(value || "Nuevo criterio");
+      generateDescriptors();
+      renderAll();
+      setTimeout(() => {
+        const inputs = criterionList.querySelectorAll("input");
+        inputs[inputs.length - 1].focus();
+        inputs[inputs.length - 1].select();
+      }, 0);
+    }
+
+    function removeCriterion(index) {
+      state.criteria.splice(index, 1);
+      generateDescriptors();
+      renderAll();
+    }
+
+    function renderAll() {
+      renderSummary();
+      renderCriteria();
+      renderRubric();
+      renderRecords();
+    }
+
+    function renderSummary() {
+      const area = AREAS[areaSelect.value];
+      const cycleGroup = getCycleGroup();
+      heroTitle.textContent = `Rubrica para ${activitySelect.value}`;
+      heroCopy.textContent = `${areaSelect.value} | ${cycleSelect.value}`;
+
+      heroChips.innerHTML = "";
+      [areaSelect.value, activitySelect.value, cycleGroup, "Superior | Alto | Básico | Bajo"].forEach((text) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = text;
+        heroChips.appendChild(chip);
+      });
+
+      areaFocus.textContent = area.focus;
+      competencyList.innerHTML = area.competencies.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+      cycleFocus.textContent = area.cycles[cycleGroup] || area.cycles.media;
+    }
+
+    function renderCriteria() {
+      criterionList.innerHTML = "";
+      state.criteria.forEach((criterion, index) => {
+        const item = document.createElement("div");
+        item.className = "criterion-item";
+        item.innerHTML = `
+          <div class="criterion-top">
+            <label>
+              Criterio ${index + 1}
+              <input type="text" value="${escapeAttr(criterion)}" data-criterion-index="${index}">
+            </label>
+            <button class="btn btn-danger icon-btn" type="button" title="Eliminar criterio" data-remove-index="${index}">×</button>
+          </div>
+        `;
+        criterionList.appendChild(item);
+      });
+
+      criterionList.querySelectorAll("[data-criterion-index]").forEach((input) => {
+        input.addEventListener("input", (event) => {
+          const index = Number(event.target.dataset.criterionIndex);
+          const oldValue = state.criteria[index];
+          const newValue = event.target.value;
+          state.criteria[index] = newValue;
+          if (state.descriptors[oldValue] && oldValue !== newValue) {
+            state.descriptors[newValue] = state.descriptors[oldValue];
+            delete state.descriptors[oldValue];
+          }
+          renderRubric();
+        });
+      });
+
+      criterionList.querySelectorAll("[data-remove-index]").forEach((button) => {
+        button.addEventListener("click", () => removeCriterion(Number(button.dataset.removeIndex)));
+      });
+    }
+
+    function renderRubric() {
+      const meta = getMeta();
+      rubricMeta.innerHTML = `
+        <div>Institución</div><div>Cibercolegio UCN</div>
+        <div>Área</div><div>${escapeHtml(meta.area)}</div>
+        <div>Tipo de actividad</div><div>${escapeHtml(meta.activity)}</div>
+        <div>Ciclo</div><div>${escapeHtml(meta.cycle)}</div>
+      `;
+
+      rubricBody.innerHTML = "";
+      const activeCriteria = state.criteria.map((item) => item.trim()).filter(Boolean);
+
+      if (!activeCriteria.length) {
+        rubricBody.innerHTML = `<tr><td colspan="5">Agrega al menos un criterio para construir la rúbrica.</td></tr>`;
+        return;
+      }
+
+      activeCriteria.forEach((criterion) => {
+        if (!state.descriptors[criterion]) {
+          state.descriptors[criterion] = buildDescriptorSet(criterion);
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(criterion)}</td>
+          ${LEVELS.map((level) => `
+            <td>
+              <div class="editable-cell" contenteditable="true" data-criterion="${escapeAttr(criterion)}" data-level="${level.key}">
+                ${escapeHtml(state.descriptors[criterion][level.key] || "")}
+              </div>
+            </td>
+          `).join("")}
+        `;
+        rubricBody.appendChild(tr);
+      });
+
+      rubricBody.querySelectorAll("[contenteditable]").forEach((cell) => {
+        cell.addEventListener("input", (event) => {
+          const criterion = event.currentTarget.dataset.criterion;
+          const level = event.currentTarget.dataset.level;
+          state.descriptors[criterion][level] = event.currentTarget.textContent.trim();
+        });
+      });
+    }
+
+    function generateDescriptors() {
+      state.descriptors = {};
+      state.criteria.map((item) => item.trim()).filter(Boolean).forEach((criterion) => {
+        state.descriptors[criterion] = buildDescriptorSet(criterion);
+      });
+    }
+
+    function buildDescriptorSet(criterion) {
+      const area = areaSelect.value;
+      const activity = activitySelect.value.toLowerCase();
+      const cycleGroup = getCycleGroup();
+      const subject = area;
+      const action = activity.includes("dinamización") ? "en la dinamización/socialización" : activity.includes("socialización") ? "en la socialización" : "durante el encuentro sincrónico";
+      const tone = cycleGroup === "primaria" ? "con apoyo de ejemplos cercanos" : cycleGroup === "secundaria" ? "con explicaciones claras y relación con situaciones de aprendizaje" : "con argumentos, autonomía y relación crítica con el contexto";
+      const lowerCriterion = criterion.toLowerCase();
+
+      if (lowerCriterion.includes("participación")) {
+        return {
+          superior: `Participa activamente ${action}, aporta ideas pertinentes sobre ${subject} y responde con claridad a las preguntas planteadas.`,
+          alto: `Participa en diferentes momentos ${action}, comparte aportes relacionados con ${subject} y atiende las orientaciones del docente.`,
+          basico: `Participa algunas veces ${action} y continúa fortaleciendo la seguridad para expresar sus ideas sobre ${subject}.`,
+          bajo: `En esta ocasión participa poco ${action}; puede fortalecer su disposición para intervenir y compartir sus avances.`
+        };
+      }
+
+      if (lowerCriterion.includes("comunicación") || lowerCriterion.includes("speaking")) {
+        return {
+          superior: `Se comunica con respeto, escucha a sus compañeros y expresa ideas sobre ${subject} con orden, claridad y vocabulario pertinente.`,
+          alto: `Mantiene una comunicación respetuosa y expresa ideas comprensibles durante el desarrollo de la actividad.`,
+          basico: `Comunica algunas ideas, aunque requiere fortalecer la claridad, la escucha y el uso de acuerdos de participación.`,
+          bajo: `Presenta dificultades para comunicarse durante la actividad; puede mejorar siguiendo las normas del encuentro.`
+        };
+      }
+
+      if (lowerCriterion.includes("herramientas") || lowerCriterion.includes("digital")) {
+        return {
+          superior: `Utiliza eficientemente las herramientas digitales necesarias para participar, presentar evidencias y apoyar el aprendizaje de ${subject}.`,
+          alto: `Utiliza adecuadamente los recursos tecnológicos requeridos para el desarrollo de la actividad.`,
+          basico: `Usa recursos digitales básicos y requiere afianzar su manejo para participar con mayor autonomía.`,
+          bajo: `Presenta dificultades en el uso de herramientas tecnológicas; puede mejorar con práctica y seguimiento de orientaciones.`
+        };
+      }
+
+      if (lowerCriterion.includes("compromiso") || lowerCriterion.includes("cumplimiento")) {
+        return {
+          superior: `Cumple oportunamente los compromisos académicos, demuestra preparación y sostiene una actitud responsable ${action}.`,
+          alto: `Cumple los compromisos principales y mantiene buena disposición para desarrollar la actividad.`,
+          basico: `Cumple parcialmente los compromisos y continúa fortaleciendo la organización de sus tiempos y evidencias.`,
+          bajo: `En esta ocasión no cumple varios compromisos esperados; puede mejorar con mayor seguimiento y responsabilidad.`
+        };
+      }
+
+      if (lowerCriterion.includes("listening") || lowerCriterion.includes("reading") || lowerCriterion.includes("writing")) {
+        return {
+          superior: `Demuestra dominio destacado de ${criterion} en inglés, comprende y produce mensajes adecuados al contexto comunicativo.`,
+          alto: `Demuestra buen desempeño en ${criterion} y responde a las tareas comunicativas con estructura suficiente.`,
+          basico: `Reconoce elementos básicos de ${criterion} y requiere apoyo para ampliar precisión, vocabulario y fluidez.`,
+          bajo: `Presenta dificultades en ${criterion}; puede avanzar con práctica guiada y revisión de vocabulario esencial.`
+        };
+      }
+
+      return {
+        superior: `Demuestra desempeño superior en ${criterion}, integra saberes de ${subject} ${tone} y evidencia dominio conceptual, procedimental y actitudinal.`,
+        alto: `Demuestra buen desempeño en ${criterion}, aplica los aprendizajes de ${subject} y comunica sus avances de manera pertinente.`,
+        basico: `Reconoce elementos esenciales de ${criterion} y continúa fortaleciendo la aplicación de los aprendizajes de ${subject}.`,
+        bajo: `Presenta dificultades en ${criterion}; puede revisar nuevamente los aprendizajes de ${subject} para fortalecer su desempeño.`
+      };
+    }
+
+    function saveRecord() {
+      const record = {
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        meta: getMeta(),
+        criteria: state.criteria.map((item) => item.trim()).filter(Boolean),
+        descriptors: structuredClone(state.descriptors)
+      };
+      const records = getRecords();
+      records.unshift(record);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      renderRecords();
+      showToast("Rubrica guardada en el registro local.");
+    }
+
+    function renderRecords() {
+      const records = getRecords();
+      if (!records.length) {
+        recordsList.innerHTML = `<p class="muted">Aún no hay rúbricas guardadas.</p>`;
+        return;
+      }
+
+      recordsList.innerHTML = records.map((record) => {
+        const date = new Date(record.createdAt).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" });
+        return `
+          <article class="record-item">
+            <div class="record-title">
+              <span>${escapeHtml(record.meta.area)} | ${escapeHtml(record.meta.activity)}</span>
+              <small class="muted">${date}</small>
+            </div>
+            <p class="muted">${escapeHtml(record.meta.cycle)} · ${record.criteria.length} criterios</p>
+            <div class="button-row">
+              <button class="btn btn-secondary" type="button" data-load-record="${record.id}">Cargar</button>
+              <button class="btn btn-quiet" type="button" data-copy-record="${record.id}">Duplicar</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      recordsList.querySelectorAll("[data-load-record]").forEach((button) => {
+        button.addEventListener("click", () => loadRecord(Number(button.dataset.loadRecord), false));
+      });
+      recordsList.querySelectorAll("[data-copy-record]").forEach((button) => {
+        button.addEventListener("click", () => loadRecord(Number(button.dataset.copyRecord), true));
+      });
+    }
+
+    function loadRecord(id, duplicate) {
+      const record = getRecords().find((item) => item.id === id);
+      if (!record) return;
+      areaSelect.value = record.meta.area;
+      cycleSelect.value = record.meta.cycle;
+      activitySelect.value = record.meta.activity;
+      state.criteria = [...record.criteria];
+      state.descriptors = structuredClone(record.descriptors);
+      renderAll();
+      if (duplicate) saveRecord();
+      showToast(duplicate ? "Registro duplicado." : "Registro cargado.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function downloadDocument() {
+      const logoSrc = document.querySelector(".brand img").src;
+      const exportClone = $("#rubricExport").cloneNode(true);
+      exportClone.querySelectorAll("[contenteditable]").forEach((cell) => {
+        cell.removeAttribute("contenteditable");
+      });
+      const html = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8">
+          <title>${escapeHtml(fileBaseName())}</title>
+          <style>
+            body { font-family: Calibri, Arial, sans-serif; font-size: 12pt; line-height: 1.15; color: #18212f; }
+            h1 { color: #005a9c; font-size: 16pt; line-height: 1.15; margin: 0 0 12pt; }
+            .doc-header { display: flex; align-items: center; gap: 18px; margin-bottom: 12pt; }
+            .doc-logo { width: 150px; height: auto; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            th, td { border: 1px solid #9eb4c8; padding: 6pt; vertical-align: top; font-size: 12pt; line-height: 1.15; }
+            th { background: #005a9c; color: white; }
+            .rubric-meta { display: grid; grid-template-columns: 150px 1fr; border: 1px solid #9eb4c8; border-bottom: 0; }
+            .rubric-meta div { padding: 6pt; border-bottom: 1px solid #9eb4c8; font-size: 12pt; line-height: 1.15; }
+            .rubric-meta div:nth-child(odd) { background: #edf5fb; font-weight: bold; }
+            .editable-cell { min-height: 0; }
+          </style>
+        </head>
+        <body>
+          <div class="doc-header">
+            <img class="doc-logo" src="${logoSrc}" alt="Cibercolegio UCN">
+            <h1>Rubrica de evaluación - Cibercolegio UCN</h1>
+          </div>
+          ${exportClone.outerHTML}
+        </body>
+        </html>
+      `;
+      downloadBlob(html, `${fileBaseName()}.doc`, "application/msword;charset=utf-8");
+      showToast("Documento descargado.");
+    }
+
+    function exportRecordsCsv() {
+      const records = getRecords();
+      if (!records.length) {
+        showToast("No hay registros para exportar.");
+        return;
+      }
+      const rows = [["fecha", "area", "actividad", "ciclo", "criterios"]];
+      records.forEach((record) => {
+        rows.push([
+          record.createdAt,
+          record.meta.area,
+          record.meta.activity,
+          record.meta.cycle,
+          record.criteria.join(" | ")
+        ]);
+      });
+      const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
+      downloadBlob(csv, "registros-rubricas-cibercolegio.csv", "text/csv;charset=utf-8");
+      showToast("Registros exportados.");
+    }
+
+    function deleteRecords() {
+      if (!confirm("¿Vaciar todos los registros guardados en este navegador?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      renderRecords();
+      showToast("Registros eliminados.");
+    }
+
+    function clearForm() {
+      recommendActivity();
+      state.criteria = [...TRANSVERSAL_CRITERIA, ...AREAS[areaSelect.value].criteria.slice(0, 2)];
+      generateDescriptors();
+      renderAll();
+      showToast("Nuevo formato listo.");
+    }
+
+    function switchTab(tab) {
+      const records = tab === "records";
+      $("#recordsView").hidden = !records;
+      $("#guidelinesView").hidden = records;
+      $("#recordsTab").classList.toggle("active", records);
+      $("#guidelinesTab").classList.toggle("active", !records);
+    }
+
+    function openGuide() {
+      switchTab("guidelines");
+      $("#guidelinesView").scrollIntoView({ behavior: "smooth", block: "start" });
+      showToast("Guía del proceso abierta.");
+    }
+
+    function getMeta() {
+      return {
+        area: areaSelect.value,
+        cycle: cycleSelect.value,
+        activity: activitySelect.value
+      };
+    }
+
+    function getCycleGroup() {
+  const value = cycleSelect.value;
+
+  if (value.startsWith("Ciclo 1") || value.startsWith("Ciclo 2")) {
+    return "primaria";
+  }
+
+  if (value.startsWith("Ciclo 3") || value.startsWith("Ciclo 4")) {
+    return "secundaria";
+  }
+
+  if (value.startsWith("Ciclo 5")) {
+    return "media";
+  }
+
+  return "media";
+}
+
+    function getRecords() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function fileBaseName() {
+      const meta = getMeta();
+      return slugify(`rubrica ${meta.area} ${meta.activity} ${meta.cycle}`);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("visible"), 2600);
+    }
+
+    function downloadBlob(content, filename, type) {
+      const blob = content instanceof Blob ? content : new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function unique(items) {
+      return [...new Set(items.map((item) => item.trim()).filter(Boolean))];
+    }
+
+    function slugify(value) {
+      return value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 90);
+    }
+
+    function csvCell(value) {
+      const text = String(value || "");
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+
+    init();
+  </script>
+</body>
+</html>
