@@ -766,7 +766,7 @@
           <div class="rubric-wrap">
             <div class="rubric-card" id="rubricExport">
               <div class="rubric-meta" id="rubricMeta"></div>
-              <table aria-label="Rubrica de evaluacion">
+              <table aria-label="Rúbrica de evaluación">
                 <thead>
                   <tr>
                     <th>Criterio</th>
@@ -1097,7 +1097,7 @@
     function renderSummary() {
       const area = AREAS[areaSelect.value];
       const cycleGroup = getCycleGroup();
-      heroTitle.textContent = `Rubrica para ${activitySelect.value}`;
+      heroTitle.textContent = `Rúbrica para ${activitySelect.value}`;
       heroCopy.textContent = `${areaSelect.value} | ${cycleSelect.value}`;
 
       heroChips.innerHTML = "";
@@ -1275,7 +1275,7 @@
       records.unshift(record);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
       renderRecords();
-      showToast("Rubrica guardada en el registro local.");
+      showToast("Rúbrica guardada en el registro local.");
     }
 
     function renderRecords() {
@@ -1353,7 +1353,7 @@
         <body>
           <div class="doc-header">
             <img class="doc-logo" src="${logoSrc}" alt="Cibercolegio UCN">
-            <h1>Rubrica de evaluación - Cibercolegio UCN</h1>
+            <h1>Rúbrica de evaluación - Cibercolegio UCN</h1>
           </div>
           ${exportClone.outerHTML}
         </body>
