@@ -1,1 +1,1 @@
-# r-bricas-de-calificaci-n
+# Rúbricas-de-calificación
